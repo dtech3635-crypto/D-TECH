@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D-TECH 構造設計</title>
+<meta name="description" content="D-TECH（一級建築士 木村和則）。建築物の構造設計、橋梁・擁壁・カルバートなど土木構造物の設計計算、鉄骨架台・仮設構造物の強度計算書を承ります。福井から全国対応。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Shippori+Mincho+B1:wght@600;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single calc-sheet column; a ruled left margin carries section labels like a 計算書's 項目欄 */
+:root{
+  --paper:#f6f7f5; --sheet:#ffffff; --ink:#1d2a33; --sub:#55636c; --rule:#d5dbd9;
+  --steel:#2f5d73; --mark:#b5562b; --tint:#e9eff0;
+  --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12181c; --sheet:#182127; --ink:#e3e8ea; --sub:#9aa8af; --rule:#2c3940;
+  --steel:#7fb2c9; --mark:#e08a5f; --tint:#1f2c33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12181c; --sheet:#182127; --ink:#e3e8ea; --sub:#9aa8af; --rule:#2c3940;
+  --steel:#7fb2c9; --mark:#e08a5f; --tint:#1f2c33; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.85;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto}
+a{color:var(--steel)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.4;margin:0}
+
+header.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+  padding-block:22px 18px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--mono);font-weight:500;letter-spacing:.08em;font-size:15px}
+.brand b{color:var(--mark)}
+.top nav{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
+.top nav a{color:var(--sub);text-decoration:none}
+.top nav a:hover,.top nav a:focus-visible{color:var(--ink);text-decoration:underline}
+
+.hero{padding-block:56px 44px;display:grid;gap:28px}
+.hero .who{font-size:14px;color:var(--sub);letter-spacing:.06em}
+.hero h1{font-size:clamp(30px,5.4vw,52px);font-weight:800}
+.hero h1 span{color:var(--steel)}
+.hero p.lead{max-width:38em;margin:0;font-size:17px}
+.calcline{font-family:var(--mono);font-size:13.5px;background:var(--sheet);border:1px solid var(--rule);
+  padding:14px 16px;overflow-x:auto;white-space:pre;color:var(--ink);line-height:1.7;max-width:100%}
+.calcline .ok{color:var(--mark);font-weight:500}
+.calcline .cap{display:block;font-family:var(--body);font-size:12px;color:var(--sub);margin-bottom:4px;white-space:normal}
+
+section.sec{display:grid;grid-template-columns:150px minmax(0,1fr);gap:28px;padding-block:44px;border-top:1px solid var(--rule)}
+.sec>.label{font-size:13px;letter-spacing:.12em;color:var(--sub);padding-top:6px;border-right:2px solid var(--steel);padding-right:14px}
+.sec h2{font-size:26px;font-weight:600;margin-bottom:18px}
+.sec p{margin:0 0 12px;max-width:40em}
+
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.field{background:var(--sheet);padding:22px 20px;display:flex;flex-direction:column;gap:10px}
+.field h3{font-size:19px;font-weight:600}
+.field .std{font-family:var(--mono);font-size:12px;color:var(--steel)}
+.field ul{margin:0;padding-left:1.1em;font-size:15px}
+.field li{margin-bottom:4px}
+
+.cases{display:grid;gap:0;border-top:1px solid var(--rule)}
+.case{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.case .k{font-family:var(--mono);font-size:13px;color:var(--sub);text-align:right;white-space:nowrap}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:s}
+.steps li{counter-increment:s;background:var(--sheet);border:1px solid var(--rule);padding:16px;font-size:15px}
+.steps li::before{content:"STEP " counter(s);display:block;font-family:var(--mono);font-size:12px;color:var(--mark);margin-bottom:6px;letter-spacing:.06em}
+.steps b{display:block;margin-bottom:4px}
+
+.price{background:var(--tint);padding:18px 20px;max-width:40em}
+.price p:last-child{margin-bottom:0}
+
+dl.office{display:grid;grid-template-columns:9em minmax(0,1fr);margin:0;border-top:1px solid var(--rule)}
+dl.office dt,dl.office dd{padding:10px 0;border-bottom:1px solid var(--rule);margin:0}
+dl.office dt{color:var(--sub);font-size:14px}
+.todo{background:var(--tint);color:var(--mark);font-family:var(--mono);font-size:13px;padding:1px 6px}
+
+.contact{background:var(--steel);color:var(--sheet);padding:28px 24px;display:grid;gap:10px}
+.contact h2{color:inherit}
+.contact .big{font-family:var(--mono);font-size:clamp(18px,3vw,24px);user-select:all;word-break:break-all}
+.contact p{margin:0;max-width:40em}
+footer{padding-block:28px 40px;font-size:13px;color:var(--sub)}
+
+@media (max-width:760px){
+  section.sec{grid-template-columns:minmax(0,1fr);gap:12px}
+  .sec>.label{border-right:0;border-left:2px solid var(--steel);padding:0 0 0 10px}
+  .fields{grid-template-columns:minmax(0,1fr)}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  dl.office{grid-template-columns:minmax(0,1fr)}
+  dl.office dt{border-bottom:0;padding-bottom:0}
+}
+@media (max-width:420px){.steps{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="brand"><b>D-TECH</b>　構造設計・構造計算</div>
+  <nav aria-label="ページ内">
+    <a href="#fields">業務内容</a><a href="#cases">対応例</a><a href="#flow">ご依頼の流れ</a><a href="#office">事務所概要</a><a href="#contact">お問い合わせ</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="who">一級建築士　木村和則　／　福井から全国対応</div>
+  <h1>建物も、橋も、鉄骨の架台も。<br><span>構造の計算</span>をお引き受けします。</h1>
+  <p class="lead">設計事務所・工務店・建設コンサルタント・建設会社・鉄工所の皆さまの外注先として、構造設計と計算書の作成を行っています。図面と条件をお送りいただければ、お見積りをお出しします。</p>
+  <div class="calcline" role="img" aria-label="計算書の記載例"><span class="cap">計算書の記載例：1行に1つの式と、代入した数値を書きます</span>引張応力度  σt = N / A = 900×10³ / 12,400 = 72.6 N/mm²  ≤  ft = 156 N/mm²   <span class="ok">… OK</span></div>
+</div>
+
+<section class="sec" id="fields">
+  <div class="label">業務内容</div>
+  <div>
+    <h2>3つの分野に対応します</h2>
+    <div class="fields">
+      <div class="field">
+        <h3>建築物</h3>
+        <div class="std">建築基準法・告示／RC規準／鋼構造設計規準 ほか</div>
+        <ul>
+          <li>RC造・S造の構造設計・構造計算（確認申請用）</li>
+          <li>増築・用途変更に伴う構造検討</li>
+          <li>既存建物への機器設置・荷重追加の検討</li>
+          <li>耐震補強の検討</li>
+        </ul>
+      </div>
+      <div class="field">
+        <h3>土木構造物</h3>
+        <div class="std">道路橋示方書／土木構造物設計基準 ほか</div>
+        <ul>
+          <li>橋梁の設計計算（上部工・下部工）</li>
+          <li>擁壁、ボックスカルバート、水槽・ポンプ場</li>
+          <li>補修・補強、耐震補強、落橋防止</li>
+          <li>他社が作成した計算書の検算（第三者チェック）</li>
+        </ul>
+      </div>
+      <div class="field">
+        <h3>鋼構造・仮設</h3>
+        <div class="std">JIS／鋼構造設計規準／仮設構造物指針 ほか</div>
+        <ul>
+          <li>鉄骨の架台、庇、階段、手摺、安全柵</li>
+          <li>支承取替のジャッキアップブラケット、仮受け</li>
+          <li>縁端拡幅ブラケット、架設治具</li>
+          <li>製作品の強度計算書（元請・納品先への提出用）</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:16px">大規模な建築物は、構造設計一級建築士と連携して対応します。</p>
+  </div>
+</section>
+
+<section class="sec" id="cases">
+  <div class="label">対応例</div>
+  <div>
+    <h2>これまでに計算したもの</h2>
+    <div class="cases">
+      <div class="case"><div>RC造・S造の建築物の構造設計</div><div class="k">建築</div></div>
+      <div class="case"><div>支承取替用ジャッキアップブラケット（リブの座屈、溶接、アンカー、コンクリート支圧まで照査）</div><div class="k">反力 900 kN／16項目</div></div>
+      <div class="case"><div>橋梁の縁端拡幅用 鋼製ブラケット</div><div class="k">土木</div></div>
+      <div class="case"><div>既存の鉄骨床への機器設置（荷重追加の検討）</div><div class="k">建築</div></div>
+      <div class="case"><div>工場の安全柵・手摺</div><div class="k">鋼構造</div></div>
+      <div class="case"><div>設備架台・ラック</div><div class="k">鋼構造</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="flow">
+  <div class="label">ご依頼の流れ</div>
+  <div>
+    <h2>メールだけで完結します</h2>
+    <ol class="steps">
+      <li><b>資料を送る</b>図面（寸法・板厚・材質）と荷重などの条件、計算書の提出先をお知らせください。</li>
+      <li><b>お見積り</b>照査する項目の数からお見積りと納期をお出しします。お見積りは無料です。</li>
+      <li><b>計算・計算書作成</b>審査する方が追いやすい「1行1式・数値代入」の様式で作成します。</li>
+      <li><b>納品・質疑対応</b>Word と PDF でお渡しします。審査での質問にもお答えします。</li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec" id="price">
+  <div class="label">料金</div>
+  <div>
+    <h2>照査項目の数で決まります</h2>
+    <div class="price">
+      <p>同じ形で寸法だけが違うものは、2件目以降を安くお出しします。</p>
+      <p>料金の目安：<span class="todo">【金額を入れる】</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="office">
+  <div class="label">事務所概要</div>
+  <div>
+    <h2>D-TECH</h2>
+    <dl class="office">
+      <dt>代表</dt><dd>木村和則（一級建築士・管理建築士）</dd>
+      <dt>建築士事務所登録</dt><dd><span class="todo">【登録番号】</span></dd>
+      <dt>所在地</dt><dd>〒910-3635　福井県福井市志津が丘4-202-12</dd>
+      <dt>対応地域</dt><dd>全国（打合せはメール・オンライン）</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="sec" id="contact">
+  <div class="label">お問い合わせ</div>
+  <div class="contact">
+    <h2>まずは図面を1枚お送りください</h2>
+    <div class="big">dtech3635@gmail.com</div>
+    <p>「この計算書、外に頼めないか」と思ったときにご連絡ください。お見積りまでは費用はかかりません。</p>
+  </div>
+</section>
+
+<footer>© D-TECH　一級建築士　木村和則</footer>
+</div>
+</body>
+</html>
